@@ -21,12 +21,6 @@ class ComboBox(QComboBox):
         pass
 
     def _showPopup(self):
-        max_w = 0
-        for i in range(self.count()):
-            w = self.view().sizeHintForColumn(i)
-            if w > max_w:
-                max_w = w
-        self.view().setMinimumWidth(max_w + 50)
         super(ComboBox, self).showPopup()
     
     def showItems(self):
