@@ -174,8 +174,8 @@ class TCP_UDP(COMM):
         self.updateClientsSignal.connect(self.updateClients)
         self.protoclTcpRadioBtn.clicked.connect(lambda: self.changeProtocol("tcp"))
         self.protoclUdpRadioBtn.clicked.connect(lambda: self.changeProtocol("udp"))
-        self.modeServerRadioBtn.clicked.connect(lambda: self.changeMode("server"))
-        self.modeClientRadioBtn.clicked.connect(lambda: self.changeMode("client"))
+        self.modeServerRadioBtn.clicked.connect(lambda: self.changeMode("server", self.config["protocol"]))
+        self.modeClientRadioBtn.clicked.connect(lambda: self.changeMode("client", self.config["protocol"]))
         self.clientsCombobox.currentIndexChanged.connect(self.serverModeClientChanged)
         self.disconnetClientBtn.clicked.connect(self.serverModeDisconnectClient)
         self.autoReconnect.stateChanged.connect(lambda x: self.setVar("auto_reconnect", value = x))
@@ -190,46 +190,46 @@ class TCP_UDP(COMM):
                 self.modeClientRadioBtn.show()
                 self.modeServerRadioBtn.show()
                 self.modeLabel.show()
-                self.changeMode(self.config["mode"], init=True)
+                self.changeMode(self.config["mode"], protocol, init=True)
             else:
-                self.targetCombobox.show()
-                self.targetLabel.show()
-                self.selfIPandPortLabel.show()
-                self.selfIPandPort.show()
-                self.porttEdit.show()
-                self.portLabel.show()
-                self.clientsCombobox.hide()
-                self.disconnetClientBtn.hide()
-                self.autoReconnect.hide()
-                self.autoReconnectIntervalEdit.hide()
-                self.autoReconnetLable.hide()
-                self.modeClientRadioBtn.hide()
-                self.modeServerRadioBtn.hide()
-                self.modeLabel.hide()
-                self.widget.adjustSize()
+                self.modeClientRadioBtn.show()
+                self.modeServerRadioBtn.show()
+                self.modeLabel.show()
+                self.changeMode(self.config["mode"], protocol, init=True)
             self.config["protocol"] = protocol
 
-    def changeMode(self, mode, init=False):
+    def changeMode(self, mode, protocol, init=False):
         if init or mode != self.config["mode"]:
             if self.isConnected():
                 self.openCloseSerial()
             if mode == "server":
+                if protocol == "tcp":
+                    self.clientsCombobox.show()
+                    self.disconnetClientBtn.show()
+                else:
+                    self.clientsCombobox.hide()
+                    self.disconnetClientBtn.hide()
+
                 self.targetCombobox.hide()
                 self.targetLabel.hide()
                 self.selfIPandPortLabel.hide()
                 self.selfIPandPort.hide()
                 self.porttEdit.show()
                 self.portLabel.show()
-                self.clientsCombobox.show()
-                self.disconnetClientBtn.show()
                 self.autoReconnect.hide()
                 self.autoReconnectIntervalEdit.hide()
                 self.autoReconnetLable.hide()
             else:
+                if protocol == "tcp":
+                    self.selfIPandPortLabel.show()
+                    self.selfIPandPort.show()
+                    self.selfIPandPort.setReadOnly(True)
+                else:
+                    self.selfIPandPortLabel.hide()
+                    self.selfIPandPort.hide()
+
                 self.targetCombobox.show()
                 self.targetLabel.show()
-                self.selfIPandPortLabel.show()
-                self.selfIPandPort.show()
                 self.porttEdit.hide()
                 self.portLabel.hide()
                 self.clientsCombobox.hide()
@@ -308,11 +308,11 @@ class TCP_UDP(COMM):
         elif conf_type == "mode":
             if value == "client":
                 obj.setChecked(True)
-                self.changeMode("client", init=True)
+                self.changeMode("client", self.config["protocol"], init=True)
             else:
                 obj.setChecked(False)
                 self.modeServerRadioBtn.setChecked(True)
-                self.changeMode("server", init=True)
+                self.changeMode("server", self.config["protocol"], init=True)
         elif conf_type == "target":
             for i, target in enumerate(self.config["target"][1]):
                 self.targetCombobox.addItem(target)
