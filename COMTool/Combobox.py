@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QComboBox,QListView
+from PyQt5.QtWidgets import QComboBox,QListView,QApplication
 from PyQt5.QtCore import pyqtSignal
 
 
@@ -21,6 +21,14 @@ class ComboBox(QComboBox):
         pass
 
     def _showPopup(self):
+        max_w = 0
+        for i in range(self.count()):
+            w = self.view().sizeHintForColumn(i)
+            if w > max_w:
+                max_w = w
+
+        screen_width = QApplication.desktop().availableGeometry().width()
+        self.view().setMinimumWidth(min(max_w + 50, screen_width))
         super(ComboBox, self).showPopup()
     
     def showItems(self):
